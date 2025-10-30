@@ -100,7 +100,24 @@ echo "User creation completed!"
 echo ""
 echo "Summary:"
 echo "--------"
-echo "Staff group members: $(getent group staff | cut -d: -f4 | tr ',' '\n' | wc -l)"
-echo "Visitors group members: $(getent group visitors | cut -d: -f4 | tr ',' '\n' | wc -l)"
 
-log_message "User creation process completed"
+# Count staff members - check if group has any members first
+staff_members=$(getent group staff | cut -d: -f4)
+if [ -n "$staff_members" ]; then
+    staff_count=$(echo "$staff_members" | tr ',' '\n' | grep -c '^')
+else
+    staff_count=0
+fi
+
+# Count visitor members - check if group has any members first
+visitor_members=$(getent group visitors | cut -d: -f4)
+if [ -n "$visitor_members" ]; then
+    visitor_count=$(echo "$visitor_members" | tr ',' '\n' | grep -c '^')
+else
+    visitor_count=0
+fi
+
+echo "Staff group members: $staff_count"
+echo "Visitors group members: $visitor_count"
+
+log_message "User creation process completed!"
