@@ -101,23 +101,17 @@ echo ""
 echo "Summary:"
 echo "--------"
 
-# Count staff members - check if group has any members first
-staff_members=$(getent group staff | cut -d: -f4)
-if [ -n "$staff_members" ]; then
-    staff_count=$(echo "$staff_members" | tr ',' '\n' | grep -c '^')
-else
-    staff_count=0
-fi
+# Get GID for each group
+staff_gid=$(getent group staff | cut -d: -f3)
+visitors_gid=$(getent group visitors | cut -d: -f3)
 
-# Count visitor members - check if group has any members first
-visitor_members=$(getent group visitors | cut -d: -f4)
-if [ -n "$visitor_members" ]; then
-    visitor_count=$(echo "$visitor_members" | tr ',' '\n' | grep -c '^')
-else
-    visitor_count=0
-fi
+# Count users with staff as primary group
+staff_count=$(getent passwd | awk -F: -v gid="$staff_gid" '$4 == gid {count++} END {print count+0}')
+
+# Count users with visitors as primary group
+visitor_count=$(getent passwd | awk -F: -v gid="$visitors_gid" '$4 == gid {count++} END {print count+0}')
 
 echo "Staff group members: $staff_count"
 echo "Visitors group members: $visitor_count"
 
-log_message "User creation process completed!"
+log_message "User creation process completed"
